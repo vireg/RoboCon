@@ -1,95 +1,107 @@
-#include "PS2X_lib.h"  //for v1.6
+#include <SabertoothSimplified.h>
+#include <PS2X_lib.h>  //for v1.6
+
+//Black	GND
+//Yellow	Attn	10
+//Orange	Cmd		11
+//Brown	Data	12 (Pullup, 5V)
+//Blue	Clk		13
+//Pink	Power	3.3V
+
+#define gnd0 47   
+#define en0 45
+#define vcc0 43
+#define a0 39
+#define b0 37
+
+#define gnd1 46
+#define en1 44
+#define vcc1 42
+#define a1 38
+#define b1 36
+
+#define gnd2 2
+#define en2 3
+#define vcc2 4
+#define a2 6
+#define b2 7
+
+#define gnd3 8  
+#define en3 9
+#define vcc3 10
+#define a3 12
+#define b3 13
+
+#define pneu1 25
+#define pneu2 27
+#define pneu3 29
+#define pneu4 31
+
+int w,x,y,z;
 
 PS2X ps2x; // create PS2 Controller Class
 
 //right now, the library does NOT support hot pluggable controllers, meaning 
 //you must always either restart your Arduino after you conect the controller, 
 //or call config_gamepad(pins) again after connecting the controller.
-
-#define dir1 5
-#define pwm1 4
-#define brk1 
-
-#define dir2 36
-#define pwm2 38 
-#define brk2
-
-#define vcc1 3
-#define gnd1 6
-#define vcc2 40
-#define gnd2 34
-
-#define dir3 26
-#define pwm3 24
-#define brk3
-#define vcc3 28
-#define gnd3 22
-
-#define dir4
-#define pwm4
-#define brk4
-#define vcc4
-#define gnd4
-
-#define p1 14 
-#define n1 15
-#define p2 16
-#define n2 18
-#define cg 19
-
-int w,x,y,z,t0,t1,t2,t3;
-
 int error = 0; 
 byte type = 0;
 byte vibrate = 0;
-int write;
- 
+SabertoothSimplified ST1,ST2;
+
 void setup(){
-  pinMode(dir1,OUTPUT);
-  pinMode(pwm1,OUTPUT);
+ Serial.begin(9600);
+  SabertoothTXPinSerial.begin(9600); // This is the baud rate you chose with the DIP switches.
+ 
+  pinMode(vcc0,OUTPUT);
   pinMode(vcc1,OUTPUT);
-  pinMode(gnd1,OUTPUT);
-
-  pinMode(dir2,OUTPUT);
-  pinMode(pwm2,OUTPUT);
   pinMode(vcc2,OUTPUT);
-  pinMode(gnd2,OUTPUT);
-  
-  pinMode(dir3,OUTPUT);
-  pinMode(pwm3,OUTPUT);
   pinMode(vcc3,OUTPUT);
+  
+  pinMode(gnd0,OUTPUT);
+  pinMode(gnd1,OUTPUT);
+  pinMode(gnd2,OUTPUT);
   pinMode(gnd3,OUTPUT);
+ 
+  digitalWrite(vcc0,HIGH);
+  digitalWrite(vcc1,HIGH);
+  digitalWrite(vcc2,HIGH);
+  digitalWrite(vcc3,HIGH);
   
-  pinMode(p1,OUTPUT);
-  pinMode(n1,OUTPUT);
-  pinMode(p2,OUTPUT);
-  pinMode(n2,OUTPUT);
-  pinMode(cg,OUTPUT);
+  digitalWrite(gnd0,LOW);
+  digitalWrite(gnd1,LOW);
+  digitalWrite(gnd2,LOW);
+  digitalWrite(gnd3,LOW);
   
-digitalWrite(vcc1,HIGH);
-digitalWrite(vcc2,HIGH);
-digitalWrite(gnd1,HIGH);
-digitalWrite(gnd2,HIGH);
-digitalWrite(cg,LOW);
-
-Serial.begin(9600);
-pinMode(9,OUTPUT);
-pinMode(3,OUTPUT);
-pinMode(4,OUTPUT);
-pinMode(5,OUTPUT);
-pinMode(6,OUTPUT);
-pinMode(7,OUTPUT); 
-pinMode(8,INPUT);
+  pinMode(en0,OUTPUT);
+  pinMode(a0,OUTPUT);
+  pinMode(b0,OUTPUT);
+  
+  pinMode(en1,OUTPUT);
+  pinMode(a1,OUTPUT);
+  pinMode(b1,OUTPUT);
+  
+  pinMode(en2,OUTPUT);
+  pinMode(a2,OUTPUT);
+  pinMode(b2,OUTPUT);
+  
+  pinMode(en3,OUTPUT);
+  pinMode(a3,OUTPUT);
+  pinMode(b3,OUTPUT);
+  
+  pinMode(pneu1,OUTPUT);
+  pinMode(pneu2,OUTPUT);
+  pinMode(pneu3,OUTPUT);
+  pinMode(pneu4,OUTPUT);
 
  //CHANGES for v1.6 HERE!!! **************PAY ATTENTION*************
   
- error = ps2x.config_gamepad(13,11,10,12, true, true);   //setup pins and settings:  GamePad(clock, command, attention, data, Pressures?, Rumble?) check for error
+ error = ps2x.config_gamepad(24,30,32,28,true, true);   //setup pins and settings:  GamePad(clock, command, attention, data, Pressures?, Rumble?) check for error
  
  if(error == 0){
    Serial.println("Found Controller, configured successful");
-   Serial.println("Try out all the buttons, X will vibrate the controller, faster as you press harder;");
-   Serial.println("holding L1 or R1 will print out the analog stick values.");
-   Serial.println("Go to www.billporter.info for updates and to report bugs.");
+  Serial.println("holding L1 or R1 will print out the analog stick values.");
+  Serial.println("Go to www.billporter.info for updates and to report bugs.");
  }
    
   else if(error == 1)
@@ -126,13 +138,51 @@ void loop(){
    
    you should call this at least once a second
    */
-    
-  // digitalWrite(vcc,HIGH);
+   
+   
    
  if(error == 1) //skip loop if no controller found
   return; 
+  
+ if(type == 2){ //Guitar Hero Controller
+   
+   ps2x.read_gamepad();          //read controller 
+   
+   if(ps2x.ButtonPressed(GREEN_FRET))
+     Serial.println("Green Fret Pressed");
+   if(ps2x.ButtonPressed(RED_FRET))
+     Serial.println("Red Fret Pressed");
+   if(ps2x.ButtonPressed(YELLOW_FRET))
+     Serial.println("Yellow Fret Pressed");
+   if(ps2x.ButtonPressed(BLUE_FRET))
+     Serial.println("Blue Fret Pressed");
+   if(ps2x.ButtonPressed(ORANGE_FRET))
+     Serial.println("Orange Fret Pressed");
+     
 
- else { //DualShock Controller  //4
+    if(ps2x.ButtonPressed(STAR_POWER))
+     Serial.println("Star Power Command");
+    
+    if(ps2x.Button(UP_STRUM))          //will be TRUE as long as button is pressed
+     Serial.println("Up Strum");
+    if(ps2x.Button(DOWN_STRUM))
+     Serial.println("DOWN Strum");
+  
+ 
+    if(ps2x.Button(PSB_START))                   //will be TRUE as long as button is pressed
+         Serial.println("Start is being held");
+    if(ps2x.Button(PSB_SELECT))
+         Serial.println("Select is being held");
+
+    
+    if(ps2x.Button(ORANGE_FRET)) // print stick value IF TRUE
+    {
+        Serial.print("Wammy Bar Position:");
+        Serial.println(ps2x.Analog(WHAMMY_BAR), DEC); 
+    } 
+ }
+
+ else { //DualShock Controller
   
     ps2x.read_gamepad(false, vibrate);          //read controller and set large motor to spin at 'vibrate' speed
     
@@ -141,7 +191,7 @@ void loop(){
     if(ps2x.Button(PSB_SELECT))
          Serial.println("Select is being held");
          
-         /*
+         
      if(ps2x.Button(PSB_PAD_UP)) {         //will be TRUE as long as button is pressed
        Serial.print("Up held this hard: ");
        Serial.println(ps2x.Analog(PSAB_PAD_UP), DEC);
@@ -154,11 +204,11 @@ void loop(){
        Serial.print("LEFT held this hard: ");
         Serial.println(ps2x.Analog(PSAB_PAD_LEFT), DEC);
       }
-      if(ps2x.Button(PSB_GREEN)){
+      if(ps2x.Button(PSB_PAD_DOWN)){
        Serial.print("DOWN held this hard: ");
-     Serial.println(ps2x.Analog(PSB_GREEN), DEC);
+     Serial.println(ps2x.Analog(PSAB_PAD_DOWN), DEC);
       }   
-  */
+  
     
       vibrate = ps2x.Analog(PSAB_BLUE);        //this will set the large motor vibrate speed based on 
                                               //how hard you press the blue (X) button    
@@ -176,130 +226,279 @@ void loop(){
          Serial.println("L2 pressed");
         if(ps2x.Button(PSB_R2))
          Serial.println("R2 pressed");
-        if(ps2x.Button(PSB_GREEN)){
-         Serial.println("Triangle pressed");
-        /*analogWrite(pwm1,0);
-        analogWrite(pwm2,0);
-        analogWrite(pwm3,0);
-        digitalWrite(p1,LOW);
-        digitalWrite(p2,LOW);
-        digitalWrite(n1,LOW);
-        digitalWrite(n2,LOW);*/
-        }
+     //   if(ps2x.Button(PSB_GREEN))
+       //  Serial.println("Triangle pressed");
          
     }   
          
     
-    if(ps2x.ButtonPressed(PSB_RED))             //will be TRUE if button was JUST pressed
-         Serial.println("Circle just pressed");
+    //if(ps2x.ButtonPressed(PSB_RED))             //will be TRUE if button was JUST pressed
+  //       Serial.println("Circle just pressed");
          
-    if(ps2x.ButtonReleased(PSB_PINK))             //will be TRUE if button was JUST released
-         Serial.println("Square just released");     
+    //if(ps2x.ButtonReleased(PSB_PINK))             //will be TRUE if button was JUST released
+      //   Serial.println("Square just released");     
     
-    if(ps2x.NewButtonState(PSB_BLUE))            //will be TRUE if button was JUST pressed OR released
-         Serial.println("X just changed");    
+  //  if(ps2x.NewButtonState(PSB_BLUE))            //will be TRUE if button was JUST pressed OR released
+    //     Serial.println("X just changed");    
     
- 
-// ###############################################################################################
-//MOTOR CODE
+    
+//  if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)) // print stick values if either is TRUE
+//    {
+//        Serial.print("Stick Values:");
+//        Serial.print(ps2x.Analog(PSS_LY), DEC); //Left stick, Y axis. Other options: LX, RY, RX  
+//        Serial.print(",");
+//        Serial.print(ps2x.Analog(PSS_LX), DEC); 
+//        Serial.print(",");
+//        Serial.print(ps2x.Analog(PSS_RY), DEC); 
+//        Serial.print(",");
+//        Serial.println(ps2x.Analog(PSS_RX), DEC); 
+//    } 
 
-//Assign Pins
-// 30,31,32,33 
-// 34,35,36,37
-// 38,38,40,41
-// 42,43,44,45
-
- 
-   // if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)) // print stick values if either is TRUE
-    {  //3
-        //Serial.print("Stick Values:");
-        //Serial.print(ps2x.Analog(PSS_LY), DEC);       //Left stick, Y axis. Other options: LX, RY, RX  
-        y=ps2x.Analog(PSS_RY);
-        z=ps2x.Analog(PSS_LX);
-        x=ps2x.Analog(PSAB_PAD_DOWN);
-        w=ps2x.Analog(PSAB_PAD_UP);
-        if(x){
-          digitalWrite(dir2,HIGH);digitalWrite(dir1,HIGH);digitalWrite(dir3,HIGH);
-        Serial.println(x);
-        Serial.println("TURN CW");
-        analogWrite(pwm1,150);
-        analogWrite(pwm2,150);
-        analogWrite(pwm3,150);
-        digitalWrite(p1,LOW);
-        digitalWrite(n1,LOW);
-        //digitalWrite(p2,LOW);
-        //digitalWrite(n2,HIGH);
-        }
-        else if(w){
-          digitalWrite(dir2,LOW);digitalWrite(dir1,LOW);digitalWrite(dir3,LOW);
-        Serial.println(w);
-        Serial.println("TURN CCW");
-        analogWrite(pwm1,150);
-        analogWrite(pwm2,150);
-        analogWrite(pwm3,150);
-        digitalWrite(p1,HIGH);
-        digitalWrite(n1,HIGH);
-        //analogWrite(p2,150);
-        //digitalWrite(n2,LOW);
-        }
-        else{  //2
-              if(z>=0 && z<100) {
-                t0=255-z;
-                digitalWrite(dir3,LOW);//digitalWrite(dir4,LOW);
-              Serial.println(z);
-              Serial.println("LEFT");
-              analogWrite(pwm3,t0);
-              digitalWrite(p1,LOW);
-              digitalWrite(n1,LOW);
-            //  digitalWrite(p2,LOW);
-              //digitalWrite(n2,HIGH);
-              //analogWrite(pwm4,t0);
-              }
-              else if(z>155 && z<=255) {
-                digitalWrite(dir3,HIGH);//digitalWrite(dir4,HIGH);
-              Serial.println(z);
-              Serial.println("RIGHT");
-              analogWrite(pwm3,z);
-              digitalWrite(p1,HIGH);
-              digitalWrite(n1,HIGH);
-             // analogWrite(p2,z);
-              //digitalWrite(n2,LOW);
-              //analogWrite(pwm4,z);
-              }
-              else {
-              analogWrite(pwm3,0);
-              digitalWrite(p1,LOW);
-              digitalWrite(n1,LOW);
-              //digitalWrite(p2,LOW);
-              //digitalWrite(n2,LOW);
-              //analogWrite(pwm4,0);
-              }
+      if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)){  //pullup PNEUMATIC0
+          if(ps2x.Button(PSB_GREEN)) {
+  //         //will be TRUE if button was JUST pressed
+           Serial.println(F("VUP"));
+           digitalWrite(pneu1,HIGH);
+          }
+        
+         if(ps2x.Button(PSB_BLUE)) {
+  //         //will be TRUE if button was JUST pressed
+           Serial.println(F("VD"));
+           digitalWrite(pneu2,HIGH);
+          }
+          
+         if(ps2x.Button(PSB_RED)) {
+  //         //will be TRUE if button was JUST pressed
+           Serial.println(F("HOUT"));
+           digitalWrite(pneu3,HIGH);
+          }
+        
+         if(ps2x.Button(PSB_PINK)) {
+  //         //will be TRUE if button was JUST pressed
+           Serial.println(F("HIN"));
+           digitalWrite(pneu4,HIGH);
+          }
+      }
       
-              if(y>=0 && y<100) {
-                t0=255-y;
-                digitalWrite(dir2,HIGH);digitalWrite(dir1,LOW);
-              Serial.println(y);
-              Serial.println("FORWARD");
-              analogWrite(pwm1,t0);
-              analogWrite(pwm2,t0);
+      if(ps2x.Button(PSB_PAD_DOWN)) {
+  //         //will be TRUE if button was JUST pressed
+           Serial.println(F("STOP"));
+           pist_stop();
+      }
+               
+          
+        if(1)
+    {  //3
+        //Serial.print(F("Stick Values:"));
+        //Serial.print(ps2x.Analog(PSS_LY), DEC);       //Left stick, Y axis. Other options: LX, RY, RX 
+        y=ps2x.Analog(PSS_RY);
+        x=ps2x.Analog(PSS_LX);
+       if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)){  //Loop1
+       if(x>=0 && x<100 && y>=0 && y<100) {
+         nWest(127);  //L,U
+       }
+       else if(x>155 && x<=255 && y>=0 && y<100) {
+         nEast(127);  //R,U
+       }
+       else if(x>=0 && x<100 && y>155 && y<=255) {
+         sWest(127);  //L,D
+       }
+       else if(x>155 && x<=255 && y>155 && y<=255) {
+         sEast(127);  //R,D
+       }
+       else if(ps2x.Button(PSB_PAD_RIGHT)){
+        tcw();
+        }
+      else if(ps2x.Button(PSB_PAD_LEFT)){
+        tccw();
+        }
+       }  //Loop1
+              else if(x>=0 && x<100) {
+                xLEFT(x);
+              }
+              else if(x>155 && x<=255) {
+                xRIGHT(x);
+              }
+              else if(y>=0 && y<100) {
+                yUP(y);
               }
               else if(y>155 && y<=255) {
-                digitalWrite(dir2,LOW);digitalWrite(dir1,HIGH);
-              Serial.println(y);
-              Serial.println("BACKWARD");
-              analogWrite(pwm1,y);
-              analogWrite(pwm2,y);
+                yDOWN(y);
               }
               else {
-              analogWrite(pwm1,0);
-              analogWrite(pwm2,0); 
+                 neutral();
               }              
-        }  //2
-      }  //3
+        //}  //2
+        if(ps2x.ButtonPressed(PSB_BLUE))
+      {
+        neutral();
+      } 
+      
+    }  //3
+      
+      
 }  //4
-    
 
 
 delay(50);
      
 }
+
+void yUP(int y)
+{
+//  int t0=map(y,0,100,255,0);
+  int t0=map(y,0,100,127,0);
+  ST1.motor(1, t0);
+  ST1.motor(2, t0);
+  ST2.motor(1, t0);
+  ST2.motor(2, t0);
+                //neutral();
+//                digitalWrite(a0,LOW); digitalWrite(b0,HIGH); analogWrite(en0,t0);
+//                digitalWrite(a1,HIGH); digitalWrite(b1,LOW); analogWrite(en1,t0);
+//                digitalWrite(a2,LOW);digitalWrite(b2,HIGH);analogWrite(en2,t0);
+//                digitalWrite(a3,LOW);digitalWrite(b3,HIGH);analogWrite(en3,t0);
+//                Serial.println(y);
+                  Serial.println("Up");
+}
+
+void yDOWN(int y)
+{
+  int t0=map(y,155,255,0,-127);
+  ST1.motor(1, t0);
+  ST1.motor(2, t0);
+  ST2.motor(1, t0);
+  ST2.motor(2, t0);
+//                int t0=map(y,155,255,0,255);
+//                digitalWrite(a0,HIGH);digitalWrite(b0,LOW); analogWrite(en0,t0);
+//                digitalWrite(a1,LOW);digitalWrite(b1,HIGH);analogWrite(en1,t0);
+//                digitalWrite(a2,HIGH);digitalWrite(b2,LOW);analogWrite(en2,t0);
+//                digitalWrite(a3,HIGH);digitalWrite(b3,LOW);analogWrite(en3,t0);
+                  Serial.println("Down");
+}
+
+void xLEFT(int x)
+{
+  int t0=map(y,0,100,127,0);
+  int t1=map(y,155,255,0,-127);
+  ST1.motor(1, t0);
+  ST1.motor(2, t1);
+  ST2.motor(1, t1);
+  ST2.motor(2, t0);
+//                int t0=map(x,0,100,255,0);
+//                digitalWrite(a0,LOW);digitalWrite(b0,HIGH);analogWrite(en0,t0);
+//                digitalWrite(a1,LOW);digitalWrite(b1,HIGH);analogWrite(en1,t0);
+//                digitalWrite(a2,HIGH);digitalWrite(b2,LOW);analogWrite(en2,t0);
+//                digitalWrite(a3,LOW);digitalWrite(b3,HIGH);analogWrite(en3,t0);
+//                Serial.println(x);
+                  Serial.println("LEFT");
+}
+
+void xRIGHT(int x)
+{
+  int t0=map(y,0,100,127,0);
+  int t1=map(y,155,255,0,-127);
+  ST1.motor(1, t1);
+  ST1.motor(2, t0);
+  ST2.motor(1, t0);
+  ST2.motor(2, t1);
+//                int t0=map(x,155,255,0,255);
+//                digitalWrite(a0,HIGH);digitalWrite(b0,LOW);analogWrite(en0,t0);    
+//                digitalWrite(a1,HIGH);digitalWrite(b1,LOW);analogWrite(en1,t0);
+//                digitalWrite(a2,LOW);digitalWrite(b2,HIGH);analogWrite(en2,t0);
+//                digitalWrite(a3,HIGH);digitalWrite(b3,LOW);analogWrite(en3,t0);
+//                Serial.println(x);
+                  Serial.println("RIGHT");
+}
+
+void nWest(int t0)  //1,3
+{
+                digitalWrite(a0,LOW);digitalWrite(b0,HIGH);analogWrite(en0,180);
+                digitalWrite(a1,LOW);digitalWrite(b1,LOW);analogWrite(en1,0);
+                analogWrite(en2,0);
+                digitalWrite(a3,LOW);digitalWrite(b3,HIGH);analogWrite(en3,180);
+                Serial.println("nWest"); 
+}
+
+void nEast(int t0)  //0,2
+{
+                digitalWrite(a0,LOW);digitalWrite(b0,LOW);analogWrite(en0,0);
+                digitalWrite(a1,HIGH);digitalWrite(b1,LOW);analogWrite(en1,180);
+                digitalWrite(a2,LOW);digitalWrite(b2,HIGH);analogWrite(en2,180);
+                analogWrite(en3,0);
+                Serial.println("nEast");          
+}
+
+void sWest(int t0)  //0,2
+{
+                digitalWrite(a0,LOW);digitalWrite(b0,LOW);analogWrite(en0,0);
+                digitalWrite(a1,LOW);digitalWrite(b1,HIGH);analogWrite(en1,180);
+                digitalWrite(a2,HIGH);digitalWrite(b2,LOW);analogWrite(en2,180);
+                analogWrite(en3,0);
+                Serial.println("sWest"); 
+}
+
+void sEast(int t0)  //1,3
+{
+                digitalWrite(a0,HIGH);digitalWrite(b0,LOW);analogWrite(en0,180);
+                digitalWrite(a1,LOW);digitalWrite(b1,LOW);analogWrite(en1,0);
+                analogWrite(en2,0);
+                digitalWrite(a3,HIGH);digitalWrite(b3,LOW);analogWrite(en3,180);
+                Serial.println("sEast"); 
+}
+
+void tcw()
+{
+  int t0=127;
+                //neutral();
+                digitalWrite(a0,HIGH); digitalWrite(b0,LOW); analogWrite(en0,t0);
+                digitalWrite(a1,LOW); digitalWrite(b1,HIGH); analogWrite(en1,t0);
+                digitalWrite(a2,LOW);digitalWrite(b2,HIGH);analogWrite(en2,t0);
+                digitalWrite(a3,LOW);digitalWrite(b3,HIGH);analogWrite(en3,t0);
+                Serial.println("CW");
+}
+
+void tccw()
+{
+  int t0=127;
+                //neutral();
+                digitalWrite(a0,LOW); digitalWrite(b0,HIGH); analogWrite(en0,t0);
+                digitalWrite(a1,HIGH); digitalWrite(b1,LOW); analogWrite(en1,t0);
+                digitalWrite(a2,HIGH);digitalWrite(b2,LOW);analogWrite(en2,t0);
+                digitalWrite(a3,HIGH);digitalWrite(b3,LOW);analogWrite(en3,t0);
+                Serial.println("CCW");
+}
+
+void brake()
+{
+ Serial.println("Brake");
+ digitalWrite(a2,HIGH);digitalWrite(b2,HIGH);analogWrite(en2,0);
+ digitalWrite(a1,HIGH);digitalWrite(b1,HIGH);analogWrite(en1,0);
+ digitalWrite(a3,HIGH);digitalWrite(b3,HIGH);analogWrite(en3,0);
+ digitalWrite(a0,HIGH);digitalWrite(b0,HIGH);analogWrite(en0,0);
+}
+
+void neutral()
+{
+  digitalWrite(a0,LOW);
+  digitalWrite(b0,LOW);
+  
+  digitalWrite(a1,LOW);
+  digitalWrite(b1,LOW);
+  
+  digitalWrite(a2,LOW);
+  digitalWrite(b2,LOW);
+  
+  digitalWrite(a3,LOW);
+  digitalWrite(b3,LOW);
+  
+  Serial.println("neutral");
+}
+
+void pist_stop()
+{
+digitalWrite(pneu1,LOW);
+digitalWrite(pneu2,LOW);
+digitalWrite(pneu3,LOW);
+digitalWrite(pneu4,LOW);
+}
+
