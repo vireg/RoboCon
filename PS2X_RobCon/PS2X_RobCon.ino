@@ -1,5 +1,5 @@
 #include <SabertoothSimplified.h>
-#include <PS2X_lib.h>  //for v1.6
+#include "PS2X_lib.h"  //for v1.6
 
 //Black	GND
 //Yellow	Attn	10
@@ -32,12 +32,17 @@
 #define a3 12
 #define b3 13
 
+#define hall1 00
+#define hall2 00
+#define hall3 A2 
+#define hall4 A5
 #define pneu1 25
 #define pneu2 27
 #define pneu3 29
 #define pneu4 31
 
 int w,x,y,z;
+int hallvalue1,hallvalue2,hallvalue3,hallvalue4;
 
 PS2X ps2x; // create PS2 Controller Class
 
@@ -215,9 +220,6 @@ void loop(){
     
     if (ps2x.NewButtonState())               //will be TRUE if any button changes state (on to off, or off to on)
     {
-     
-       
-         
         if(ps2x.Button(PSB_L3))
          Serial.println("L3 pressed");
         if(ps2x.Button(PSB_R3))
@@ -228,7 +230,6 @@ void loop(){
          Serial.println("R2 pressed");
      //   if(ps2x.Button(PSB_GREEN))
        //  Serial.println("Triangle pressed");
-         
     }   
          
     
@@ -240,7 +241,6 @@ void loop(){
     
   //  if(ps2x.NewButtonState(PSB_BLUE))            //will be TRUE if button was JUST pressed OR released
     //     Serial.println("X just changed");    
-    
     
 //  if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)) // print stick values if either is TRUE
 //    {
@@ -254,40 +254,45 @@ void loop(){
 //        Serial.println(ps2x.Analog(PSS_RX), DEC); 
 //    } 
 
-      if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)){  //pullup PNEUMATIC0
-          if(ps2x.Button(PSB_GREEN)) {
-  //         //will be TRUE if button was JUST pressed
-           Serial.println(F("VUP"));
-           digitalWrite(pneu1,HIGH);
-          }
-        
-         if(ps2x.Button(PSB_BLUE)) {
-  //         //will be TRUE if button was JUST pressed
-           Serial.println(F("VD"));
-           digitalWrite(pneu2,HIGH);
-          }
-          
-         if(ps2x.Button(PSB_RED)) {
-  //         //will be TRUE if button was JUST pressed
-           Serial.println(F("HOUT"));
-           digitalWrite(pneu3,HIGH);
-          }
-        
-         if(ps2x.Button(PSB_PINK)) {
-  //         //will be TRUE if button was JUST pressed
-           Serial.println(F("HIN"));
-           digitalWrite(pneu4,HIGH);
-          }
-      }
-      
-      if(ps2x.Button(PSB_PAD_DOWN)) {
-  //         //will be TRUE if button was JUST pressed
-           Serial.println(F("STOP"));
+//Circle controls pneu1(UP), pneu2(DOWN) if PSB pressed
+    if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)){  //pullup PNEUMATIC0
+         if(ps2x.ButtonPressed(PSB_RED)) {
+         //will be TRUE if button was JUST pressed
+         Serial.println(F("Circle just pressed"));
+         digitalWrite(pneu1,HIGH);
+         }
+    }  //pullup PNEUMATIC0
+    else if(ps2x.ButtonPressed(PSB_RED)) {  //pulldown PNEUMATIC0
+         //will be TRUE if button was JUST pressed
+         Serial.println(F("Circle just pressed"));
+         digitalWrite(pneu2,HIGH);
+         }  //pulldown PNEUMATIC0
+//Square controls pneu3(UP), pneu4(DOWN) if PSB pressed
+    if(ps2x.Button(PSB_L1) || ps2x.Button(PSB_R1)){  //pullup PNEUMATIC1
+         if(ps2x.ButtonPressed(PSB_PINK)) {
+         //will be TRUE if button was JUST pressed
+         Serial.println(F("Square just pressed"));
+         digitalWrite(pneu3,HIGH);
+         }
+    }  //pullup PNEUMATIC1
+    else if(ps2x.ButtonPressed(PSB_PINK)) {  //pulldown PNEUMATIC1
+         //will be TRUE if button was JUST pressed
+         Serial.println(F("Square just pressed"));
+         digitalWrite(pneu4,HIGH);
+         }  //pulldown PNEUMATIC1
+    
+         hallvalue1 = analogRead(hall1);
+         hallvalue2 = analogRead(hall2);
+         hallvalue3 = analogRead(hall3);
+         hallvalue4 = analogRead(hall4);
+         Serial.println(hallvalue3);Serial.println(hallvalue4);
+         if(hallvalue1<400 || hallvalue2<400 || hallvalue3<400 || hallvalue4<400) {
+           if(hallvalue3<400 && hallvalue4>400) Serial.println("ThreeThreeThreeThreeThreeThree");
+           if(hallvalue4<400 && hallvalue3>400) Serial.println("FourFourFourFourFourFourFour");
            pist_stop();
-      }
-               
+         }
           
-        if(1)
+        if(true)
     {  //3
         //Serial.print(F("Stick Values:"));
         //Serial.print(ps2x.Analog(PSS_LY), DEC);       //Left stick, Y axis. Other options: LX, RY, RX 
