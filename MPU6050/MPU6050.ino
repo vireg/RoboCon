@@ -28,7 +28,7 @@ int16_t gyroX, gyroY, gyroZ;
 
 double accXangle, accYangle; // Angle calculate using the accelerometer
 double temp; // Temperature
-double gyroXangle, gyroYangle; // Angle calculate using the gyro
+double gyroXangle, gyroYangle,gyroZangle; // Angle calculate using the gyro
 double compAngleX, compAngleY; // Calculate the angle using a complementary filter
 double kalAngleX, kalAngleY; // Calculate the angle using a Kalman filter
 
@@ -36,7 +36,7 @@ uint32_t timer;
 uint8_t i2cData[14]; // Buffer for I2C data
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Wire.begin();
   TWBR = ((F_CPU / 400000L) - 16) / 2; // Set I2C frequency to 400kHz
 
@@ -93,8 +93,10 @@ void loop() {
 
   double gyroXrate = (double)gyroX / 131.0;
   double gyroYrate = -((double)gyroY / 131.0);
+  double gyroZrate = -((double)gyroZ / 131.0);
   gyroXangle += gyroXrate * ((double)(micros() - timer) / 1000000); // Calculate gyro angle without any filter
   gyroYangle += gyroYrate * ((double)(micros() - timer) / 1000000);
+  gyroZangle += gyroZrate * ((double)(micros() - timer) / 1000000);
   //gyroXangle += kalmanX.getRate()*((double)(micros()-timer)/1000000); // Calculate gyro angle using the unbiased rate
   //gyroYangle += kalmanY.getRate()*((double)(micros()-timer)/1000000);
 
@@ -117,20 +119,20 @@ void loop() {
   Serial.print(gyroY); Serial.print("\t");
   Serial.print(gyroZ); Serial.print("\t");
 #endif
-  Serial.print(accXangle); Serial.print("\t");
-  Serial.print(gyroXangle); Serial.print("\t");
-  Serial.print(compAngleX); Serial.print("\t");
-  Serial.print(kalAngleX); Serial.print("\t");
+//  Serial.print(accXangle); Serial.print("\t");
+//  Serial.print(gyroXangle); Serial.print("\t");
+//  Serial.print(compAngleX); Serial.print("\t");
+//  Serial.print(kalAngleX); Serial.print("\t");
 
   Serial.print("\t");
 
-  Serial.print(accYangle); Serial.print("\t");
-  Serial.print(gyroYangle); Serial.print("\t");
-  Serial.print(compAngleY); Serial.print("\t");
-  Serial.print(kalAngleY); Serial.print("\t");
+//  Serial.print(accYangle); Serial.print("\t");
+//  Serial.print(gyroYangle); Serial.print("\t");
+//  Serial.print(compAngleY); Serial.print("\t");
+//  Serial.print(kalAngleY); Serial.print("\t");
 
   //Serial.print(temp);Serial.print("\t");
-
+Serial.println(gyroZangle);
   Serial.print("\r\n");
   delay(1);
 }
