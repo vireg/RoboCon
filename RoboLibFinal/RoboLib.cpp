@@ -7,8 +7,6 @@
 //******************** Main code ********************//
 unsigned int mode = 0;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
 bool registers[8];
-bool line_detected;
-int step_ss=1,step_swing=1,step_pole=1,step_gym=1;
 //**********************************************************************//
 
 //******************** PS2 controller ********************//
@@ -21,9 +19,17 @@ PS2X ps2x; // create PS2 Controller Class
 //******************** Pneumatics ********************//
 int ver_cylinder_pos=0;
 int hor_cylinder_pos=0;
+int arm_cylinder_pos=1;
 int ver_cylinder_target=0;
 int hor_cylinder_target=0;
+int arm_cylinder_target=1;
+int ver_cylinder_status=0;
+int hor_cylinder_status=0;
+int arm_cylinder_status=0;
 //**********************************************************************//
+
+int holding_motor_pwm=150;
+int holding_motor_status=0;
 
 /*
 Configure pins of arduino as either INPUT/OUTPUT and initialize them as either HIGH/LOW. Comment out pins not in use.
@@ -370,7 +376,7 @@ if(ps2x.NewButtonState(PSB_BLUE));
 /////******************************************************************************************/////
 void adjLoop()
 {
-  setModeLED('F');
+  setModeLED(0);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -612,3 +618,4 @@ void hor_cylinder_goto(int hor_cylinder_target)
 
   }
 }
+

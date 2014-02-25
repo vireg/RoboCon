@@ -12,10 +12,10 @@ extern bool registers[8];
 //**********************************************************************//
 
 //******************** PS2 controller ********************//
-#define PS2_CLK 13
-#define PS2_CMD 11
-#define PS2_ATTN 10
-#define PS2_DAT 12
+#define PS2_CLK A3
+#define PS2_CMD A1
+#define PS2_ATTN A0
+#define PS2_DAT A2
 #define pressures true
 #define rumble true
 extern int error; 
@@ -40,17 +40,36 @@ void PS2_setup();
 #define ver_cylinder_ret    11//vertical cylinder retract pin
 #define hor_cylinder_ext    12//horizontal cylinder extend pin
 #define hor_cylinder_ret    13//orizontal cylinder retract pin
+#define arm_cylinder_ext   13  //arm cylinder extend pin
+#define arm_cylinder_ret    14  //arm cylinder retract pin
 
 extern int ver_cylinder_pos;
 extern int hor_cylinder_pos;
+extern int arm_cylinder_pos;
 extern int ver_cylinder_target;
 extern int hor_cylinder_target;
+extern int arm_cylinder_target;
+extern int ver_cylinder_status;
+extern int hor_cylinder_status;
+extern int arm_cylinder_status;
 //**********************************************************************//
 
 // these constants are temporaryily defined for the purpose of testing
 const int SER_Pin = 8;   //pin 14 on the 75HC595
 const int RCLK_Pin = 9;  //pin 12 on the 75HC595
 const int SRCLK_Pin = 10; //pin 11 on the 75HC595
+///////////////////////////////////Holding Motor Pins/////////////////////
+#define holding_motor_a       15 //hoding motor driver pin a
+#define holding_motor_b        16//hoding motor driver pin b
+#define holding_motor_e        17//hoding motor driver pin enable
+///////////////////////////////////Clamping pins//////////////////////////
+#define carriage_clamp_1        18//Carriage clamping magnet
+#define carriage_clamp_2        19//Carriage clamping magnet
+#define autobot_holder          20//autobot holding magnet
+#define swing_pulling           21//swing pulling mechanism
+//holding motor variables
+extern int holding_motor_pwm;
+extern int holding_motor_status;
 // these constants are temporaryily defined for the purpose of testing
 
 //Edit pin names as per requirement
