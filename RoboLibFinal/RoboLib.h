@@ -4,6 +4,12 @@
 #include "Arduino.h"
 #include "PS2X_lib.h"
 #include "SabertoothSimplified.h"
+#include <digitalWriteFast.h>
+
+//******************** Main code ********************//
+extern unsigned int mode;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
+extern bool registers[8];
+//**********************************************************************//
 
 //******************** PS2 controller ********************//
 #define PS2_CLK 13
@@ -15,16 +21,36 @@
 extern int error; 
 extern byte type;
 extern byte vibrate;
+extern PS2X ps2x; // create PS2 Controller Class
 void PS2_setup();
 //**********************************************************************//
 
+//******************** Pneumatics ********************//
+#define ver_hall_1      2  //vertical piston hall sensor 1
+#define ver_hall_2      3 //vertical piston hall sensor 2
+#define ver_hall_3      4  //vertical piston hall sensor 3
+#define ver_hall_4      5  //vertical piston hall sensor 4
+
+#define hor_hall_1      6  //horizontal piston hall sensor 1
+#define hor_hall_2      7  //horizontal piston hall sensor 2
+#define hor_hall_3      8  //horizontal piston hall sensor 3
+#define hor_hall_4      9  //horizontal piston hall sensor 4
+
+#define ver_cylinder_ext    10//vertical cylinder extend pin
+#define ver_cylinder_ret    11//vertical cylinder retract pin
+#define hor_cylinder_ext    12//horizontal cylinder extend pin
+#define hor_cylinder_ret    13//orizontal cylinder retract pin
+
+extern int ver_cylinder_pos;
+extern int hor_cylinder_pos;
+extern int ver_cylinder_target;
+extern int hor_cylinder_target;
+//**********************************************************************//
+
 // these constants are temporaryily defined for the purpose of testing
-extern char mode;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
-extern bool registers[8];
 const int SER_Pin = 8;   //pin 14 on the 75HC595
 const int RCLK_Pin = 9;  //pin 12 on the 75HC595
 const int SRCLK_Pin = 10; //pin 11 on the 75HC595
-extern PS2X ps2x; // create PS2 Controller Class
 // these constants are temporaryily defined for the purpose of testing
 
 //Edit pin names as per requirement
@@ -87,7 +113,7 @@ void arduConfig();
 void clearRegisters();
 void setRegisterPin(int,int);
 void writeRegisters();
-void setModeLED(char);
+void setModeLED(unsigned int);
 
 void ssLoop();
 void poleLoop();
@@ -95,5 +121,8 @@ void swingLoop();
 void gymLoop();
 void runLoop();
 void adjLoop();
+
+void ver_cylinder_goto(int);
+void hor_cylinder_goto(int);
 
 #endif

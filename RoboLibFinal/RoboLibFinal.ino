@@ -1,6 +1,7 @@
 #include "RoboLib.h"
 #include "PS2X_lib.h"
 #include "SabertoothSimplified.h"
+#include <digitalWriteFast.h>
 
 //Saber Definitions
 SabertoothSimplified ST1(Serial3);     // Use Serial3 as the serial port.
@@ -10,6 +11,7 @@ void setup()
 {
   // initialize the serial communications:
   Serial.begin(9600);
+  arduConfig();
   PS2_setup();
      
   pinMode(SER_Pin, OUTPUT);
@@ -28,48 +30,36 @@ void loop()
 {
   ps2x.read_gamepad(false, vibrate);
   
-  if(ps2x.Button(PSB_BLUE))
-  ssLoop();
-  if (Serial.available()) 
+if(ps2x.ButtonPressed(PSB_R1))//Mode Increment
+{
+    if(mode==4)
+      mode=0;
+    else
+      mode+=1;
+}
+  if(ps2x.ButtonPressed(PSB_L1))
   {
-  mode=Serial.read();
-  Serial.write(mode);
+    if(mode==1)                                      //See-Saw
+    {
+      ssLoop();
+    }
+    else if(mode==2)                                  //Swing
+    {
+      swingLoop();
+    }
+    else if(mode==3)                              //Pole Walk
+    {
+      poleLoop();
+    }
+    else if(mode==4)                                //Ladder
+    {
+      gymLoop();
+    }
+    else
+    {
+      runLoop();
+    }
   }
-/*  if(ps2x.Button(PSB_L2)){
-  Serial.println("L2 pressed");
-  if (mode=='A') mode = 'A';
-  else mode--;
-  */
-  if (mode=='A') ssLoop();
-  else if (mode=='B') poleLoop();
-  else if (mode=='C') swingLoop();
-  else if (mode=='D') gymLoop();
-  else if (mode=='E') runLoop();
-  else if (mode=='F') adjLoop();
-/*  }
-  else if(ps2x.Button(PSB_R2)){
-  Serial.println("R2 pressed");
-  if (mode=='F') mode = 'F';
-  else mode++;
-  
-  if (mode=='A') ssLoop();
-  else if (mode=='B') poleLoop();
-  else if (mode=='C') swingLoop();
-  else if (mode=='D') gymLoop();
-  else if (mode=='E') runLoop();
-  else if (mode=='F') adjLoop();
-  
-  }
-  // print the sensor values:
-  Serial.print(analogRead(xpin));
-  // print a tab between values:
-  Serial.print("\t");
-  Serial.print(analogRead(ypin));
-  // print a tab between values:
-  Serial.print("\t");
-  Serial.print(analogRead(zpin));
-  Serial.println();
-  // delay before next reading:
-  delay(100);
-*/
+
+
 }

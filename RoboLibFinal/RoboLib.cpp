@@ -2,15 +2,27 @@
 #include "RoboLib.h"
 #include "PS2X_lib.h"
 #include "SabertoothSimplified.h"
+#include <digitalWriteFast.h>
 
-char mode = 'E';    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
+//******************** Main code ********************//
+unsigned int mode = 0;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
 bool registers[8];
+bool line_detected;
+int step_ss=1,step_swing=1,step_pole=1,step_gym=1;
+//**********************************************************************//
 
 //******************** PS2 controller ********************//
 int error = 0; 
 byte type = 0;
 byte vibrate = 0;
 PS2X ps2x; // create PS2 Controller Class
+//**********************************************************************//
+
+//******************** Pneumatics ********************//
+int ver_cylinder_pos=0;
+int hor_cylinder_pos=0;
+int ver_cylinder_target=0;
+int hor_cylinder_target=0;
 //**********************************************************************//
 
 /*
@@ -180,9 +192,9 @@ void writeRegisters(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////******************************************************************************************/////
-void setModeLED(char modeLED)
+void setModeLED(unsigned int modeLED)
 {
-  if(modeLED=='A'){
+  if(modeLED==0){
   setRegisterPin(1, LOW);
   setRegisterPin(2, HIGH);
   setRegisterPin(3, HIGH);
@@ -191,9 +203,8 @@ void setModeLED(char modeLED)
   setRegisterPin(6, HIGH);
   setRegisterPin(7, HIGH);
   setRegisterPin(8, HIGH);
-  writeRegisters();
   }
-  else if(modeLED=='B'){
+  else if(modeLED==1){
   setRegisterPin(1, HIGH);
   setRegisterPin(2, LOW);
   setRegisterPin(3, HIGH);
@@ -202,9 +213,8 @@ void setModeLED(char modeLED)
   setRegisterPin(6, HIGH);
   setRegisterPin(7, HIGH);
   setRegisterPin(8, HIGH);
-  writeRegisters();
   }
-  else if(modeLED=='C'){
+  else if(modeLED==2){
   setRegisterPin(1, HIGH);
   setRegisterPin(2, HIGH);
   setRegisterPin(3, LOW);
@@ -213,9 +223,8 @@ void setModeLED(char modeLED)
   setRegisterPin(6, HIGH);
   setRegisterPin(7, HIGH);
   setRegisterPin(8, HIGH);
-  writeRegisters();
   }
-  else if(modeLED=='D'){
+  else if(modeLED==3){
   setRegisterPin(1, HIGH);
   setRegisterPin(2, HIGH);
   setRegisterPin(3, HIGH);
@@ -224,9 +233,8 @@ void setModeLED(char modeLED)
   setRegisterPin(6, HIGH);
   setRegisterPin(7, HIGH);
   setRegisterPin(8, HIGH);
-  writeRegisters();
   }
-  else if(modeLED=='E'){
+  else if(modeLED==4){
   setRegisterPin(1, HIGH);
   setRegisterPin(2, HIGH);
   setRegisterPin(3, HIGH);
@@ -235,9 +243,9 @@ void setModeLED(char modeLED)
   setRegisterPin(6, HIGH);
   setRegisterPin(7, HIGH);
   setRegisterPin(8, HIGH);
-  writeRegisters();
   }
-  else if(modeLED=='F'){
+  /*
+  else if(modeLED==5){
   setRegisterPin(1, HIGH);
   setRegisterPin(2, HIGH);
   setRegisterPin(3, HIGH);
@@ -246,43 +254,116 @@ void setModeLED(char modeLED)
   setRegisterPin(6, LOW);
   setRegisterPin(7, HIGH);
   setRegisterPin(8, HIGH);
+  }*/
   writeRegisters();
-  }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////******************************************************************************************/////
 void ssLoop()
 {
-    setModeLED('A');
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
+    setModeLED(1);
+    ps2x.read_gamepad(false, vibrate);
+if(ps2x.Button(PSB_L1))
+if(ps2x.Button(PSB_R1))
 
-/////******************************************************************************************/////
-void poleLoop()
-{
-  setModeLED('B');
+if(ps2x.Button(PSB_PAD_UP))
+if(ps2x.Button(PSB_PAD_RIGHT))
+if(ps2x.Button(PSB_PAD_DOWN))
+if(ps2x.Button(PSB_PAD_LEFT))
+
+if(ps2x.Button(PSB_GREEN))
+if(ps2x.ButtonPressed(PSB_RED))
+if(ps2x.ButtonReleased(PSB_PINK))
+if(ps2x.NewButtonState(PSB_BLUE));
+
+    ver_cylinder_goto(0);
+    hor_cylinder_goto(0);
+    
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////******************************************************************************************/////
 void swingLoop()
 {
-  setModeLED('C');
+  setModeLED(2);
+  ps2x.read_gamepad(false, vibrate);
+if(ps2x.Button(PSB_L1))
+if(ps2x.Button(PSB_R1))
+
+if(ps2x.Button(PSB_PAD_UP))
+if(ps2x.Button(PSB_PAD_RIGHT))
+if(ps2x.Button(PSB_PAD_DOWN))
+if(ps2x.Button(PSB_PAD_LEFT))
+
+if(ps2x.Button(PSB_GREEN))
+if(ps2x.ButtonPressed(PSB_RED))
+if(ps2x.ButtonReleased(PSB_PINK))
+if(ps2x.NewButtonState(PSB_BLUE));
+
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////******************************************************************************************/////
+void poleLoop()
+{
+  setModeLED(3);
+  ps2x.read_gamepad(false, vibrate);
+if(ps2x.Button(PSB_L1))
+if(ps2x.Button(PSB_R1))
+
+if(ps2x.Button(PSB_PAD_UP))
+if(ps2x.Button(PSB_PAD_RIGHT))
+if(ps2x.Button(PSB_PAD_DOWN))
+if(ps2x.Button(PSB_PAD_LEFT))
+
+if(ps2x.Button(PSB_GREEN))
+if(ps2x.ButtonPressed(PSB_RED))
+if(ps2x.ButtonReleased(PSB_PINK))
+if(ps2x.NewButtonState(PSB_BLUE));
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////******************************************************************************************/////
 void gymLoop()
 {
-  setModeLED('D');
+  setModeLED(4);
+  ps2x.read_gamepad(false, vibrate);
+if(ps2x.Button(PSB_L1))
+if(ps2x.Button(PSB_R1))
+
+if(ps2x.Button(PSB_PAD_UP))
+if(ps2x.Button(PSB_PAD_RIGHT))
+if(ps2x.Button(PSB_PAD_DOWN))
+if(ps2x.Button(PSB_PAD_LEFT))
+
+if(ps2x.Button(PSB_GREEN))
+if(ps2x.ButtonPressed(PSB_RED))
+if(ps2x.ButtonReleased(PSB_PINK))
+if(ps2x.NewButtonState(PSB_BLUE));
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////******************************************************************************************/////
 void runLoop()
 {
-  setModeLED('E');
+  setModeLED(0);
+  ps2x.read_gamepad(false, vibrate);
+if(ps2x.Button(PSB_L1))
+if(ps2x.Button(PSB_R1))
+
+if(ps2x.Button(PSB_PAD_UP))
+if(ps2x.Button(PSB_PAD_RIGHT))
+if(ps2x.Button(PSB_PAD_DOWN))
+if(ps2x.Button(PSB_PAD_LEFT))
+
+if(ps2x.Button(PSB_GREEN))
+if(ps2x.ButtonPressed(PSB_RED))
+if(ps2x.ButtonReleased(PSB_PINK))
+if(ps2x.NewButtonState(PSB_BLUE));
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -292,3 +373,242 @@ void adjLoop()
   setModeLED('F');
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////    VERTICAL CYLINDER FUNCTION    ////////////////////////
+
+void ver_cylinder_goto(int ver_cylinder_target)
+{
+  switch(ver_cylinder_target)
+  {
+
+  case 1:            //if target is 1 i.e. base
+    if(ver_cylinder_pos>1)
+    {
+      if(digitalReadFast(ver_hall_1)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ret,LOW);     //Piston Stops Retraction
+        ver_cylinder_pos=1;                      //Position Reached
+      }
+    }
+    else if(ver_cylinder_pos<1)
+    {
+      if(digitalReadFast(ver_hall_1)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ext,LOW);     //Piston Stops extension
+        ver_cylinder_pos=1;                      //Position Reached
+      }
+    }
+    break;                                //break after case 1
+
+
+  case 2:            //if target is 2
+    if(ver_cylinder_pos>2)
+    {
+      if(digitalReadFast(ver_hall_2)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ret,LOW);     //Piston Stops Retraction
+        ver_cylinder_pos=2;                      //Position Reached
+      }
+    }
+    else if(ver_cylinder_pos<2)
+    {
+      if(digitalReadFast(ver_hall_2)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ext,LOW);     //Piston Stops extension
+        ver_cylinder_pos=2;                      //Position Reached
+      }
+    }
+    break;                                //break after case 2
+
+
+  case 3:            //if target is 3
+    if(ver_cylinder_pos>3)
+    {
+      if(digitalReadFast(ver_hall_3)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ret,LOW);     //Piston Stops Retraction
+        ver_cylinder_pos=3;                      //Position Reached
+      }
+    }
+    else if(ver_cylinder_pos<3)
+    {
+      if(digitalReadFast(ver_hall_3)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ext,LOW);     //Piston Stops extension
+        ver_cylinder_pos=3;                      //Position Reached
+      }
+    }
+    break;                                //break after case 3
+
+  case 4:            //if target is 4 i.e. top
+    if(ver_cylinder_pos>4)
+    {
+      if(digitalReadFast(ver_hall_4)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ret,LOW);     //Piston Stops Retraction
+        ver_cylinder_pos=4;                      //Position Reached
+      }
+    }
+    else if(ver_cylinder_pos<4)
+    {
+      if(digitalReadFast(ver_hall_4)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(ver_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(ver_cylinder_ext,LOW);     //Piston Stops extension
+        ver_cylinder_pos=4;                      //Position Reached
+      }
+    }
+    break;                                //break after case 4
+
+  }
+}
+
+////////////////////////      HORIZONTAL CYLINDER FUNCTION    //////////////////////////////////
+void hor_cylinder_goto(int hor_cylinder_target)            
+{
+  switch(hor_cylinder_target)
+  {
+
+  case 1:            //if target is 1 i.e. base
+    if(hor_cylinder_pos>1)
+    {
+      if(digitalReadFast(hor_hall_1)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ret,LOW);     //Piston Stops Retraction
+        hor_cylinder_pos=1;                      //Position Reached
+      }
+    }
+    else if(hor_cylinder_pos<1)
+    {
+      if(digitalReadFast(hor_hall_1)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ext,LOW);     //Piston Stops extension
+        hor_cylinder_pos=1;                      //Position Reached
+      }
+    }
+    break;                                //break after case 1
+
+
+  case 2:            //if target is 2
+    if(hor_cylinder_pos>2)
+    {
+      if(digitalReadFast(hor_hall_2)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ret,LOW);     //Piston Stops Retraction
+        hor_cylinder_pos=2;                      //Position Reached
+      }
+    }
+    else if(hor_cylinder_pos<2)
+    {
+      if(digitalReadFast(hor_hall_2)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ext,LOW);     //Piston Stops extension
+        hor_cylinder_pos=2;                      //Position Reached
+      }
+    }
+    break;                                //break after case 2
+
+
+  case 3:            //if target is 3
+    if(hor_cylinder_pos>3)
+    {
+      if(digitalReadFast(hor_hall_3)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ret,LOW);     //Piston Stops Retraction
+        hor_cylinder_pos=3;                      //Position Reached
+      }
+    }
+    else if(hor_cylinder_pos<3)
+    {
+      if(digitalReadFast(hor_hall_3)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ext,LOW);     //Piston Stops extension
+        hor_cylinder_pos=3;                      //Position Reached
+      }
+    }
+    break;                                //break after case 3
+
+  case 4:            //if target is 4 i.e. top
+    if(hor_cylinder_pos>4)
+    {
+      if(digitalReadFast(hor_hall_4)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ret,HIGH);    //Retract
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ret,LOW);     //Piston Stops Retraction
+        hor_cylinder_pos=4;                      //Position Reached
+      }
+    }
+    else if(hor_cylinder_pos<4)
+    {
+      if(digitalReadFast(hor_hall_4)==HIGH)  //read appropriate sensor, if its not detecting
+      {
+        digitalWriteFast(hor_cylinder_ext,HIGH);    //extend
+      }
+      else
+      {
+        digitalWriteFast(hor_cylinder_ext,LOW);     //Piston Stops extension
+        hor_cylinder_pos=4;                      //Position Reached
+      }
+    }
+    break;                                //break after case 4
+
+  }
+}
