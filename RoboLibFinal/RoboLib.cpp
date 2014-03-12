@@ -193,121 +193,6 @@ digitalWrite(i,HIGH);
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-///////******************************************************************************************/////
-//void ssLoop()
-//{
-//    setModeLED(1);
-//    ps2x.read_gamepad(false, vibrate);
-//if(ps2x.Button(PSB_L1))
-//if(ps2x.Button(PSB_R1))
-//
-//if(ps2x.Button(PSB_PAD_UP))
-//if(ps2x.Button(PSB_PAD_RIGHT))
-//if(ps2x.Button(PSB_PAD_DOWN))
-//if(ps2x.Button(PSB_PAD_LEFT))
-//
-//if(ps2x.Button(PSB_GREEN))
-//if(ps2x.ButtonPressed(PSB_RED))
-//if(ps2x.ButtonReleased(PSB_PINK))
-//if(ps2x.NewButtonState(PSB_BLUE));
-//
-//    ver_cylinder_goto(0);
-//    hor_cylinder_goto(0);
-//    
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-///////******************************************************************************************/////
-//void swingLoop()
-//{
-//  setModeLED(2);
-//  ps2x.read_gamepad(false, vibrate);
-//if(ps2x.Button(PSB_L1))
-//if(ps2x.Button(PSB_R1))
-//
-//if(ps2x.Button(PSB_PAD_UP))
-//if(ps2x.Button(PSB_PAD_RIGHT))
-//if(ps2x.Button(PSB_PAD_DOWN))
-//if(ps2x.Button(PSB_PAD_LEFT))
-//
-//if(ps2x.Button(PSB_GREEN))
-//if(ps2x.ButtonPressed(PSB_RED))
-//if(ps2x.ButtonReleased(PSB_PINK))
-//if(ps2x.NewButtonState(PSB_BLUE));
-//
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-///////******************************************************************************************/////
-//void poleLoop()
-//{
-//  setModeLED(3);
-//  ps2x.read_gamepad(false, vibrate);
-//if(ps2x.Button(PSB_L1))
-//if(ps2x.Button(PSB_R1))
-//
-//if(ps2x.Button(PSB_PAD_UP))
-//if(ps2x.Button(PSB_PAD_RIGHT))
-//if(ps2x.Button(PSB_PAD_DOWN))
-//if(ps2x.Button(PSB_PAD_LEFT))
-//
-//if(ps2x.Button(PSB_GREEN))
-//if(ps2x.ButtonPressed(PSB_RED))
-//if(ps2x.ButtonReleased(PSB_PINK))
-//if(ps2x.NewButtonState(PSB_BLUE));
-//
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-///////******************************************************************************************/////
-//void gymLoop()
-//{
-//  setModeLED(4);
-//  ps2x.read_gamepad(false, vibrate);
-//if(ps2x.Button(PSB_L1))
-//if(ps2x.Button(PSB_R1))
-//
-//if(ps2x.Button(PSB_PAD_UP))
-//if(ps2x.Button(PSB_PAD_RIGHT))
-//if(ps2x.Button(PSB_PAD_DOWN))
-//if(ps2x.Button(PSB_PAD_LEFT))
-//
-//if(ps2x.Button(PSB_GREEN))
-//if(ps2x.ButtonPressed(PSB_RED))
-//if(ps2x.ButtonReleased(PSB_PINK))
-//if(ps2x.NewButtonState(PSB_BLUE));
-//
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-///////******************************************************************************************/////
-//void runLoop()
-//{
-//  setModeLED(0);
-//  ps2x.read_gamepad(false, vibrate);
-//if(ps2x.Button(PSB_L1))
-//if(ps2x.Button(PSB_R1))
-//
-//if(ps2x.Button(PSB_PAD_UP))
-//if(ps2x.Button(PSB_PAD_RIGHT))
-//if(ps2x.Button(PSB_PAD_DOWN))
-//if(ps2x.Button(PSB_PAD_LEFT))
-//
-//if(ps2x.Button(PSB_GREEN))
-//if(ps2x.ButtonPressed(PSB_RED))
-//if(ps2x.ButtonReleased(PSB_PINK))
-//if(ps2x.NewButtonState(PSB_BLUE));
-//
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-///////******************************************************************************************/////
-//void adjLoop()
-//{
-//  setModeLED(0);
-//}
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void signalChild(int sigNum)
 {
@@ -318,6 +203,7 @@ void signalChild(int sigNum)
   else if(sigNum==5) analogWrite(commpin,commsigd);
   else analogWrite(commpin,0);
 }
+
 //////////////////////////////////////////    VERTICAL CYLINDER FUNCTION    ////////////////////////
 
 void ver_cylinder_goto(int ver_cylinder_target)

@@ -3,19 +3,6 @@
 #include "PS2X_lib.h"
 #include "SabertoothSimplified.h"
 
-//////////******************************Legacy Code******************************//////////
-#define hall1 00
-#define hall2 00
-#define hall3 00 
-#define hall4 00
-#define pneu1 00
-#define pneu2 00
-#define pneu3 00
-#define pneu4 00
-int hallvalue1,hallvalue2,hallvalue3,hallvalue4;
-int xval,yval;
-//////////**********************************************************************//////////
-
 //Saber Definitions
 SabertoothSimplified ST1(Serial1);     // Use Serial3 as the serial port.
 SabertoothSimplified ST2(Serial2);     // Use Serial2 as the serial port.
@@ -388,7 +375,7 @@ if(sigBot) {
 //  {
 //    override=!override;
 //    if(override)
-//    Serial.print("OverrideOverrideOverrideOverride");
+//    Serial.print("Override Override Override Override");
 //  }
 
 
@@ -756,20 +743,4 @@ void PIDControl(int ctrldir)
 //    ST2.motor(1,31);  //3
 //    ST2.motor(2,31);  //4
 //}
-//
-//void trajectory()
-//{
-//  int s1=10;
-//  static int s2=10;
-////  ps2x.read_gamepad(false, vibrate);
-////  if(ps2x.Button(PSB_TRIANGLE))
-////  {
-//  ST1.motor(1,-s2);
-//  ST1.motor(2,s2);
-//  ST2.motor(1,s1);
-//  ST2.motor(2,s1);
-//  delay(250);
-//  Serial.println("trajectory");
-//  s2++;
-////  }
-//}
+

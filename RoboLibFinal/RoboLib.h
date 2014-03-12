@@ -143,17 +143,9 @@ void setRegisterPin(int,int);
 void writeRegisters();
 void setModeLED(int);
 
-void ssLoop();
-void poleLoop();
-void swingLoop();
-void gymLoop();
-void runLoop();
-void adjLoop();
-
 void ver_cylinder_goto(int);
 void hor_cylinder_goto(int);
 
 void signalChild(int);
-
 
 #endif
