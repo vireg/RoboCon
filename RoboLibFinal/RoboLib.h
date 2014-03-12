@@ -6,9 +6,24 @@
 #include "SabertoothSimplified.h"
 #include <digitalWriteFast.h>
 
+//Black	GND
+//Yellow	Attn
+//Orange	Cmd
+//Brown	Data (Pullup, 5V)
+//Blue	Clk
+//Pink	Power	3.3V
+
 //******************** Main code ********************//
+#define commsee 50
+#define commswing 100
+#define commpole 150
+#define commgym 200
+#define commsigd 250
+#define commpin
 extern unsigned int mode;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
 extern bool registers[8];
+extern bool sigBot;
+extern int sigNo;
 //**********************************************************************//
 
 //******************** PS2 controller ********************//
@@ -143,5 +158,8 @@ void adjLoop();
 
 void ver_cylinder_goto(int);
 void hor_cylinder_goto(int);
+
+void signalChild(int);
+
 
 #endif

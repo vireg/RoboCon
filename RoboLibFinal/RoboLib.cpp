@@ -7,6 +7,8 @@
 //******************** Main code ********************//
 unsigned int mode = 0;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
 bool registers[8];
+bool sigBot=false;
+int sigNo=0;
 //**********************************************************************//
 
 //******************** PS2 controller ********************//
@@ -31,25 +33,28 @@ int arm_cylinder_status=0;
 int holding_motor_pwm=150;
 int holding_motor_status=0;
 
+//////////******************************Legacy Code******************************//////////
+//////////**********************************************************************//////////
+
 /*
 Configure pins of arduino as either INPUT/OUTPUT and initialize them as either HIGH/LOW. Comment out pins not in use.
 */
 void arduConfig()
 {
-    pinMode(pin1,OUTPUT);
-    pinMode(pin2,OUTPUT);
-    pinMode(pin3,OUTPUT);
-    pinMode(pin4,OUTPUT);
-    pinMode(pin5,OUTPUT);
-    pinMode(pin6,OUTPUT);
-    pinMode(pin7,OUTPUT);
-    pinMode(pin8,OUTPUT);
-    pinMode(pin9,OUTPUT);
-    pinMode(pin10,OUTPUT);
-    pinMode(pin11,OUTPUT);
-    pinMode(pin12,OUTPUT);
-    pinMode(pin13,OUTPUT);
-    pinMode(pin14,OUTPUT);
+    pinMode(ver_hall_1,INPUT);
+    pinMode(ver_hall_2,INPUT);
+    pinMode(ver_hall_3,INPUT);
+    pinMode(ver_hall_4,INPUT);
+    pinMode(hor_hall_1,INPUT);
+    pinMode(hor_hall_2,INPUT);
+    pinMode(hor_hall_3,INPUT);
+    pinMode(hor_hall_4,INPUT);
+    pinMode(ver_cylinder_ext,OUTPUT);
+    pinMode(ver_cylinder_ret,OUTPUT);
+    pinMode(hor_cylinder_ext,OUTPUT);
+    pinMode(hor_cylinder_ret,OUTPUT);
+    pinMode(arm_cylinder_ext,OUTPUT);
+    pinMode(arm_cylinder_ret,OUTPUT);
     pinMode(pin15,OUTPUT);
     pinMode(pin16,OUTPUT);
     pinMode(pin17,OUTPUT);
@@ -380,6 +385,15 @@ void adjLoop()
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void signalChild(int sigNum)
+{
+  if(sigNum==1) analogWrite(commpin,commsaw);
+  else if(sigNum==2) analogWrite(commpin,commswing);
+  else if(sigNum==3) analogWrite(commpin,commpole);
+  else if(sigNum==4) analogWrite(commpin,commgym);
+  else if(sigNum==5) analogWrite(commpin,commsigd);
+  else analogWrite(commpin,0);
+}
 //////////////////////////////////////////    VERTICAL CYLINDER FUNCTION    ////////////////////////
 
 void ver_cylinder_goto(int ver_cylinder_target)
@@ -618,4 +632,5 @@ void hor_cylinder_goto(int hor_cylinder_target)
 
   }
 }
+
 

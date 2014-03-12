@@ -3,6 +3,19 @@
 #include "SabertoothSimplified.h"
 #include <digitalWriteFast.h>
 
+//////////******************************Legacy Code******************************//////////
+#define hall1 00
+#define hall2 00
+#define hall3 00 
+#define hall4 00
+#define pneu1 00
+#define pneu2 00
+#define pneu3 00
+#define pneu4 00
+int hallvalue1,hallvalue2,hallvalue3,hallvalue4;
+int xval,yval;
+//////////**********************************************************************//////////
+
 //Saber Definitions
 SabertoothSimplified ST1(Serial3);     // Use Serial3 as the serial port.
 SabertoothSimplified ST2(Serial2);     // Use Serial2 as the serial port.
@@ -68,7 +81,6 @@ void loop()
       if(ps2x.ButtonPressed(PSB_TRIANGLE))  //go to see saw placing position
       {
         hor_cylinder_target=2;
-        Serial.println("Move It");
       }
       if(ps2x.ButtonPressed(PSB_CROSS))  //
       {
@@ -84,7 +96,6 @@ void loop()
       }
       if(ps2x.Button(PSB_PAD_UP))  //
       {
-        
       }
       if(ps2x.ButtonPressed(PSB_PAD_DOWN))  //AutoBot Holding Magnet ON/OFF
       {
@@ -92,10 +103,13 @@ void loop()
       }
       if(ps2x.ButtonPressed(PSB_PAD_LEFT))  //Swing Pulling Mechanism ON/OFF
       {
-        
+        sigBot=true;
+        sigNo=1;        
       }
       if(ps2x.Button(PSB_PAD_RIGHT))  //
       {
+        sigBot=true;
+        sigNo=5;
       }
     }
   }
@@ -126,9 +140,13 @@ void loop()
       }
       if(ps2x.ButtonPressed(PSB_PAD_LEFT))  //Swing Pulling Mechanism ON/OFF
       {
+        sigBot=true;
+        sigNo=2;
       }
       if(ps2x.Button(PSB_PAD_RIGHT))  //
       {
+        sigBot=true;
+        sigNo=5;
       }
     }
   }
@@ -159,9 +177,13 @@ void loop()
       }
       if(ps2x.ButtonPressed(PSB_PAD_LEFT))  //Swing Pulling Mechanism ON/OFF
       {
+        sigBot=true;
+        sigNo=3;
       }
       if(ps2x.Button(PSB_PAD_RIGHT))  //
       {
+        sigBot=true;
+        sigNo=5;
       }
     }
   }
@@ -192,9 +214,13 @@ void loop()
       }
       if(ps2x.ButtonPressed(PSB_PAD_LEFT))  //Swing Pulling Mechanism ON/OFF
       {
+        sigBot=true;
+        sigNo=4;
       }
       if(ps2x.Button(PSB_PAD_RIGHT))  //
       {
+        sigBot=true;
+        sigNo=5;
       }
     }
   }
@@ -298,7 +324,7 @@ void loop()
       holding_motor_status=0;
     }
   }
-
+  signalChild(sigNo);
   x=ps2x.Analog(PSS_RX);
   y=ps2x.Analog(PSS_LY);
 
@@ -406,8 +432,8 @@ void holo_drive(int x, int y, int t,boolean line)
     m4= m4*127/divisor;
   }
 
-  ST2.motor(1,(int)m1);
-  ST2.motor(2,(int)m2);
+  ST2.motor(2,(int)m1);
+  ST2.motor(1,(int)m2);
   ST1.motor(1,(int)m3);
   ST1.motor(2,(int)m4);
 
@@ -431,3 +457,5 @@ void holo_drive(int x, int y, int t,boolean line)
    Serial.println((int)m4);
    */
 }
+
+
