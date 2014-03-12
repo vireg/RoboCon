@@ -1,16 +1,43 @@
 #include "Arduino.h"
 #include "RoboLib.h"
+#include <digitalWriteFast.h>
 #include "PS2X_lib.h"
 #include "SabertoothSimplified.h"
-#include <digitalWriteFast.h>
 
 //******************** Main code ********************//
-unsigned int mode = 0;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
+unsigned int mode = 1;    //Seesaw, Pole walk, Swing, Jungle gym, Run, Drive adjust
 bool registers[8];
 bool sigBot=false;
+bool swpull=false;
+bool holdauto=true;
 int sigNo=0;
+bool pwmAdjust=false;
+bool magnetON;
 //**********************************************************************//
 
+//****************** PID ********************//
+double ITerm=0;
+double kp=1;
+double ki=0;
+double kd=0;
+int errorPrevious;
+bool track=false;
+//////////////////////////////////Line Follower//////////////////////////
+//int line_val0 = 0;
+int line_v1 = 0;
+int line_v2 = 0;
+int line_v3 = 0;
+int line_v4 = 0;
+int line_v5 = 0;
+int line_v6 = 0;
+int line_v7 = 0;
+int line_v8 = 0;
+int line_v9 = 0;
+int line_v10 = 0;
+int line_v11 = 0;
+int line_v12 = 0;
+bool override=true;
+bool lineaction=true;
 //******************** PS2 controller ********************//
 int error = 0; 
 byte type = 0;
@@ -30,9 +57,9 @@ int hor_cylinder_status=0;
 int arm_cylinder_status=0;
 //**********************************************************************//
 
+
 int holding_motor_pwm=150;
 int holding_motor_status=0;
-
 //////////******************************Legacy Code******************************//////////
 //////////**********************************************************************//////////
 
@@ -55,101 +82,45 @@ void arduConfig()
     pinMode(hor_cylinder_ret,OUTPUT);
     pinMode(arm_cylinder_ext,OUTPUT);
     pinMode(arm_cylinder_ret,OUTPUT);
-    pinMode(pin15,OUTPUT);
-    pinMode(pin16,OUTPUT);
-    pinMode(pin17,OUTPUT);
-    pinMode(pin18,OUTPUT);
-    pinMode(pin19,OUTPUT);
-    pinMode(pin20,OUTPUT);
-    pinMode(pin21,OUTPUT);
-    pinMode(pin22,OUTPUT);
-    pinMode(pin23,OUTPUT);
-    pinMode(pin24,OUTPUT);
-    pinMode(pin25,OUTPUT);
-    pinMode(pin26,OUTPUT);
-    pinMode(pin27,OUTPUT);
-    pinMode(pin28,OUTPUT);
-    pinMode(pin29,OUTPUT);
-    pinMode(pin30,OUTPUT);
-    pinMode(pin31,OUTPUT);
-    pinMode(pin32,OUTPUT);
-    pinMode(pin33,OUTPUT);
-    pinMode(pin34,OUTPUT);
-    pinMode(pin35,OUTPUT);
-    pinMode(pin36,OUTPUT);
-    pinMode(pin37,OUTPUT);
-    pinMode(pin38,OUTPUT);
-    pinMode(pin39,OUTPUT);
-    pinMode(pin40,OUTPUT);
-    pinMode(pin41,OUTPUT);
-    pinMode(pin42,OUTPUT);
-    pinMode(pin43,OUTPUT);
-    pinMode(pin44,OUTPUT);
-    pinMode(pin45,OUTPUT);
-    pinMode(pin46,OUTPUT);
-    pinMode(pin47,OUTPUT);
-    pinMode(pin48,OUTPUT);
-    pinMode(pin49,OUTPUT);
-    pinMode(pin50,OUTPUT);
-    pinMode(pin51,OUTPUT);
-    pinMode(pin52,OUTPUT);
-    pinMode(pin53,OUTPUT);
-    pinMode(pin54,OUTPUT);
     
-    digitalWrite(pin1,HIGH);
-    digitalWrite(pin2,HIGH);
-    digitalWrite(pin3,HIGH);
-    digitalWrite(pin4,HIGH);
-    digitalWrite(pin5,HIGH);
-    digitalWrite(pin6,HIGH);
-    digitalWrite(pin7,HIGH);
-    digitalWrite(pin8,HIGH);
-    digitalWrite(pin9,HIGH);
-    digitalWrite(pin10,HIGH);
-    digitalWrite(pin11,HIGH);
-    digitalWrite(pin12,HIGH);
-    digitalWrite(pin13,HIGH);
-    digitalWrite(pin14,HIGH);
-    digitalWrite(pin15,HIGH);
-    digitalWrite(pin16,HIGH);
-    digitalWrite(pin17,HIGH);
-    digitalWrite(pin18,HIGH);
-    digitalWrite(pin19,HIGH);
-    digitalWrite(pin20,HIGH);
-    digitalWrite(pin21,HIGH);
-    digitalWrite(pin22,HIGH);
-    digitalWrite(pin23,HIGH);
-    digitalWrite(pin24,HIGH);
-    digitalWrite(pin25,HIGH);
-    digitalWrite(pin26,HIGH);
-    digitalWrite(pin27,HIGH);
-    digitalWrite(pin28,HIGH);
-    digitalWrite(pin29,HIGH);
-    digitalWrite(pin30,HIGH);
-    digitalWrite(pin31,HIGH);
-    digitalWrite(pin32,HIGH);
-    digitalWrite(pin33,HIGH);
-    digitalWrite(pin34,HIGH);
-    digitalWrite(pin35,HIGH);
-    digitalWrite(pin36,HIGH);
-    digitalWrite(pin37,HIGH);
-    digitalWrite(pin38,HIGH);
-    digitalWrite(pin39,HIGH);
-    digitalWrite(pin40,HIGH);
-    digitalWrite(pin41,HIGH);
-    digitalWrite(pin42,HIGH);
-    digitalWrite(pin43,HIGH);
-    digitalWrite(pin44,HIGH);
-    digitalWrite(pin45,HIGH);
-    digitalWrite(pin46,HIGH);
-    digitalWrite(pin47,HIGH);
-    digitalWrite(pin48,HIGH);
-    digitalWrite(pin49,HIGH);
-    digitalWrite(pin50,HIGH);
-    digitalWrite(pin51,HIGH);
-    digitalWrite(pin52,HIGH);
-    digitalWrite(pin53,HIGH);
-    digitalWrite(pin54,HIGH);
+    pinMode(carriage_clamp_1,OUTPUT);
+    pinMode(carriage_clamp_2,OUTPUT);
+    pinMode(autobot_holder,OUTPUT);
+    pinMode(swing_pulling,OUTPUT);
+    
+    digitalWrite(autobot_holder,LOW);
+  pinMode(line_1, INPUT);
+  pinMode(line_2, INPUT);
+  pinMode(line_3, INPUT);
+  pinMode(line_4, INPUT);
+  pinMode(line_5, INPUT);
+  pinMode(line_6, INPUT);
+  digitalWrite(line_1,HIGH);
+  digitalWrite(line_2,HIGH);
+  digitalWrite(line_3,HIGH);
+  digitalWrite(line_4,HIGH);
+  digitalWrite(line_5,HIGH);
+  digitalWrite(line_6,HIGH);
+
+    pinMode(modeled1,OUTPUT);
+    pinMode(modeled2,OUTPUT);
+    pinMode(modeled3,OUTPUT);
+    pinMode(modeled4,OUTPUT);
+    pinMode(modeled5,OUTPUT);
+    pinMode(modeled6,OUTPUT);
+    
+    pinMode(pwm,OUTPUT);
+      analogWrite(pwm,0);
+    pinMode(holdir,OUTPUT);
+
+setModeLED(0);
+//    digitalWrite(modeled1,LOW);
+//    digitalWrite(modeled2,LOW);
+//    digitalWrite(modeled3,LOW);
+//    digitalWrite(modeled4,LOW);
+//    digitalWrite(modeled5,LOW);
+//    digitalWrite(modeled6,LOW);
+    
 }
 
 void PS2_setup()
@@ -173,221 +144,174 @@ void PS2_setup()
      }
 }
      
-/////******************************************************************************************/////
-void clearRegisters(){
-  for(int i = 7; i>=0; i--){
-     registers[i] = HIGH;
-  }
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void setRegisterPin(int index, int value){
-  registers[index-1] = value;
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void writeRegisters(){
-  digitalWrite(RCLK_Pin, LOW);
-  for(int i = 7; i>=0; i--){
-    digitalWrite(SRCLK_Pin, LOW);
-    
-    int val = registers[i];
-    digitalWrite(SER_Pin, val);
-    
-    digitalWrite(SRCLK_Pin, HIGH);
-  }
-  digitalWrite(RCLK_Pin, HIGH);
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void setModeLED(unsigned int modeLED)
+///////******************************************************************************************/////
+//void clearRegisters(){
+//  for(int i = 7; i>=0; i--){
+//     registers[i] = HIGH;
+//  }
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void setRegisterPin(int index, int value){
+//  registers[index-1] = value;
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void writeRegisters(){
+//  digitalWrite(RCLK_Pin, LOW);
+//  for(int i = 7; i>=0; i--){
+//    digitalWrite(SRCLK_Pin, LOW);
+//    
+//    int val = registers[i];
+//    digitalWrite(SER_Pin, val);
+//    
+//    digitalWrite(SRCLK_Pin, HIGH);
+//  }
+//  digitalWrite(RCLK_Pin, HIGH);
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+void setModeLED(int modeLED)
 {
-  if(modeLED==0){
-  setRegisterPin(1, LOW);
-  setRegisterPin(2, HIGH);
-  setRegisterPin(3, HIGH);
-  setRegisterPin(4, HIGH);
-  setRegisterPin(5, HIGH);
-  setRegisterPin(6, HIGH);
-  setRegisterPin(7, HIGH);
-  setRegisterPin(8, HIGH);
-  }
-  else if(modeLED==1){
-  setRegisterPin(1, HIGH);
-  setRegisterPin(2, LOW);
-  setRegisterPin(3, HIGH);
-  setRegisterPin(4, HIGH);
-  setRegisterPin(5, HIGH);
-  setRegisterPin(6, HIGH);
-  setRegisterPin(7, HIGH);
-  setRegisterPin(8, HIGH);
-  }
-  else if(modeLED==2){
-  setRegisterPin(1, HIGH);
-  setRegisterPin(2, HIGH);
-  setRegisterPin(3, LOW);
-  setRegisterPin(4, HIGH);
-  setRegisterPin(5, HIGH);
-  setRegisterPin(6, HIGH);
-  setRegisterPin(7, HIGH);
-  setRegisterPin(8, HIGH);
-  }
-  else if(modeLED==3){
-  setRegisterPin(1, HIGH);
-  setRegisterPin(2, HIGH);
-  setRegisterPin(3, HIGH);
-  setRegisterPin(4, LOW);
-  setRegisterPin(5, HIGH);
-  setRegisterPin(6, HIGH);
-  setRegisterPin(7, HIGH);
-  setRegisterPin(8, HIGH);
-  }
-  else if(modeLED==4){
-  setRegisterPin(1, HIGH);
-  setRegisterPin(2, HIGH);
-  setRegisterPin(3, HIGH);
-  setRegisterPin(4, HIGH);
-  setRegisterPin(5, LOW);
-  setRegisterPin(6, HIGH);
-  setRegisterPin(7, HIGH);
-  setRegisterPin(8, HIGH);
-  }
-  /*
-  else if(modeLED==5){
-  setRegisterPin(1, HIGH);
-  setRegisterPin(2, HIGH);
-  setRegisterPin(3, HIGH);
-  setRegisterPin(4, HIGH);
-  setRegisterPin(5, HIGH);
-  setRegisterPin(6, LOW);
-  setRegisterPin(7, HIGH);
-  setRegisterPin(8, HIGH);
-  }*/
-  writeRegisters();
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
+if(lineaction) digitalWrite(2,LOW);
+else digitalWrite(2,HIGH);
 
-/////******************************************************************************************/////
-void ssLoop()
-{
-    setModeLED(1);
-    ps2x.read_gamepad(false, vibrate);
-if(ps2x.Button(PSB_L1))
-if(ps2x.Button(PSB_R1))
+if(modeLED==autobot_holder) digitalWrite(4,LOW);
+else if(modeLED==-autobot_holder) digitalWrite(4,HIGH);
 
-if(ps2x.Button(PSB_PAD_UP))
-if(ps2x.Button(PSB_PAD_RIGHT))
-if(ps2x.Button(PSB_PAD_DOWN))
-if(ps2x.Button(PSB_PAD_LEFT))
-
-if(ps2x.Button(PSB_GREEN))
-if(ps2x.ButtonPressed(PSB_RED))
-if(ps2x.ButtonReleased(PSB_PINK))
-if(ps2x.NewButtonState(PSB_BLUE));
-
-    ver_cylinder_goto(0);
-    hor_cylinder_goto(0);
-    
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void swingLoop()
-{
-  setModeLED(2);
-  ps2x.read_gamepad(false, vibrate);
-if(ps2x.Button(PSB_L1))
-if(ps2x.Button(PSB_R1))
-
-if(ps2x.Button(PSB_PAD_UP))
-if(ps2x.Button(PSB_PAD_RIGHT))
-if(ps2x.Button(PSB_PAD_DOWN))
-if(ps2x.Button(PSB_PAD_LEFT))
-
-if(ps2x.Button(PSB_GREEN))
-if(ps2x.ButtonPressed(PSB_RED))
-if(ps2x.ButtonReleased(PSB_PINK))
-if(ps2x.NewButtonState(PSB_BLUE));
+//for(int i=2;i<=7;i++)
+//{
+//  if(i==modeLED) digitalWrite(i,LOW);
+//  else digitalWrite(i,HIGH);
+//}
+if(modeLED==0) 
+for(int i=2;i<=7;i++)
+digitalWrite(i,HIGH);
 
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void poleLoop()
-{
-  setModeLED(3);
-  ps2x.read_gamepad(false, vibrate);
-if(ps2x.Button(PSB_L1))
-if(ps2x.Button(PSB_R1))
-
-if(ps2x.Button(PSB_PAD_UP))
-if(ps2x.Button(PSB_PAD_RIGHT))
-if(ps2x.Button(PSB_PAD_DOWN))
-if(ps2x.Button(PSB_PAD_LEFT))
-
-if(ps2x.Button(PSB_GREEN))
-if(ps2x.ButtonPressed(PSB_RED))
-if(ps2x.ButtonReleased(PSB_PINK))
-if(ps2x.NewButtonState(PSB_BLUE));
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void gymLoop()
-{
-  setModeLED(4);
-  ps2x.read_gamepad(false, vibrate);
-if(ps2x.Button(PSB_L1))
-if(ps2x.Button(PSB_R1))
-
-if(ps2x.Button(PSB_PAD_UP))
-if(ps2x.Button(PSB_PAD_RIGHT))
-if(ps2x.Button(PSB_PAD_DOWN))
-if(ps2x.Button(PSB_PAD_LEFT))
-
-if(ps2x.Button(PSB_GREEN))
-if(ps2x.ButtonPressed(PSB_RED))
-if(ps2x.ButtonReleased(PSB_PINK))
-if(ps2x.NewButtonState(PSB_BLUE));
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void runLoop()
-{
-  setModeLED(0);
-  ps2x.read_gamepad(false, vibrate);
-if(ps2x.Button(PSB_L1))
-if(ps2x.Button(PSB_R1))
-
-if(ps2x.Button(PSB_PAD_UP))
-if(ps2x.Button(PSB_PAD_RIGHT))
-if(ps2x.Button(PSB_PAD_DOWN))
-if(ps2x.Button(PSB_PAD_LEFT))
-
-if(ps2x.Button(PSB_GREEN))
-if(ps2x.ButtonPressed(PSB_RED))
-if(ps2x.ButtonReleased(PSB_PINK))
-if(ps2x.NewButtonState(PSB_BLUE));
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////******************************************************************************************/////
-void adjLoop()
-{
-  setModeLED(0);
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void ssLoop()
+//{
+//    setModeLED(1);
+//    ps2x.read_gamepad(false, vibrate);
+//if(ps2x.Button(PSB_L1))
+//if(ps2x.Button(PSB_R1))
+//
+//if(ps2x.Button(PSB_PAD_UP))
+//if(ps2x.Button(PSB_PAD_RIGHT))
+//if(ps2x.Button(PSB_PAD_DOWN))
+//if(ps2x.Button(PSB_PAD_LEFT))
+//
+//if(ps2x.Button(PSB_GREEN))
+//if(ps2x.ButtonPressed(PSB_RED))
+//if(ps2x.ButtonReleased(PSB_PINK))
+//if(ps2x.NewButtonState(PSB_BLUE));
+//
+//    ver_cylinder_goto(0);
+//    hor_cylinder_goto(0);
+//    
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void swingLoop()
+//{
+//  setModeLED(2);
+//  ps2x.read_gamepad(false, vibrate);
+//if(ps2x.Button(PSB_L1))
+//if(ps2x.Button(PSB_R1))
+//
+//if(ps2x.Button(PSB_PAD_UP))
+//if(ps2x.Button(PSB_PAD_RIGHT))
+//if(ps2x.Button(PSB_PAD_DOWN))
+//if(ps2x.Button(PSB_PAD_LEFT))
+//
+//if(ps2x.Button(PSB_GREEN))
+//if(ps2x.ButtonPressed(PSB_RED))
+//if(ps2x.ButtonReleased(PSB_PINK))
+//if(ps2x.NewButtonState(PSB_BLUE));
+//
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void poleLoop()
+//{
+//  setModeLED(3);
+//  ps2x.read_gamepad(false, vibrate);
+//if(ps2x.Button(PSB_L1))
+//if(ps2x.Button(PSB_R1))
+//
+//if(ps2x.Button(PSB_PAD_UP))
+//if(ps2x.Button(PSB_PAD_RIGHT))
+//if(ps2x.Button(PSB_PAD_DOWN))
+//if(ps2x.Button(PSB_PAD_LEFT))
+//
+//if(ps2x.Button(PSB_GREEN))
+//if(ps2x.ButtonPressed(PSB_RED))
+//if(ps2x.ButtonReleased(PSB_PINK))
+//if(ps2x.NewButtonState(PSB_BLUE));
+//
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void gymLoop()
+//{
+//  setModeLED(4);
+//  ps2x.read_gamepad(false, vibrate);
+//if(ps2x.Button(PSB_L1))
+//if(ps2x.Button(PSB_R1))
+//
+//if(ps2x.Button(PSB_PAD_UP))
+//if(ps2x.Button(PSB_PAD_RIGHT))
+//if(ps2x.Button(PSB_PAD_DOWN))
+//if(ps2x.Button(PSB_PAD_LEFT))
+//
+//if(ps2x.Button(PSB_GREEN))
+//if(ps2x.ButtonPressed(PSB_RED))
+//if(ps2x.ButtonReleased(PSB_PINK))
+//if(ps2x.NewButtonState(PSB_BLUE));
+//
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void runLoop()
+//{
+//  setModeLED(0);
+//  ps2x.read_gamepad(false, vibrate);
+//if(ps2x.Button(PSB_L1))
+//if(ps2x.Button(PSB_R1))
+//
+//if(ps2x.Button(PSB_PAD_UP))
+//if(ps2x.Button(PSB_PAD_RIGHT))
+//if(ps2x.Button(PSB_PAD_DOWN))
+//if(ps2x.Button(PSB_PAD_LEFT))
+//
+//if(ps2x.Button(PSB_GREEN))
+//if(ps2x.ButtonPressed(PSB_RED))
+//if(ps2x.ButtonReleased(PSB_PINK))
+//if(ps2x.NewButtonState(PSB_BLUE));
+//
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+///////******************************************************************************************/////
+//void adjLoop()
+//{
+//  setModeLED(0);
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void signalChild(int sigNum)
 {
-  if(sigNum==1) analogWrite(commpin,commsaw);
+  if(sigNum==1) analogWrite(commpin,commsee);
   else if(sigNum==2) analogWrite(commpin,commswing);
   else if(sigNum==3) analogWrite(commpin,commpole);
   else if(sigNum==4) analogWrite(commpin,commgym);
