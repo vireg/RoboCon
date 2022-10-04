@@ -1,7 +1,5 @@
-RoboConBPGC
-===========
-
-This is the code for driving the manual and automatic bots in Robocon-2014.
+RoboCon-2014
+============
 
 The following libraries are currently in use:
 
